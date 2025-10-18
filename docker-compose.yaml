@@ -1,0 +1,52 @@
+
+services:
+  # 1. Layanan Aplikasi PHP
+  app:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile
+    container_name: php_app
+    env_file:
+      - .env
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - app-network
+
+  # 2. Layanan Web Server Nginx
+  nginx:
+    image: nginx:latest
+    container_name: nginx_server
+    ports:
+      - "8080:80" # Akses proyek dari http://localhost:8080
+    volumes:
+      - ./src:/var/www/html
+      - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  # 3. Layanan Database MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    env_file:
+      - .env
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db_data:

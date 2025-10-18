@@ -1,0 +1,3 @@
+setup config nginx harus persis seperti file default.conf agar bisa membaca url
+
+setup database dulu jika ingin melihat data
